@@ -1,40 +1,52 @@
 buildscript {
-    repositories {
-        jcenter()
-        maven { url = "http://files.minecraftforge.net/maven" }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-    }
+	repositories {
+		jcenter()
+		maven { url 'https://www.jitpack.io' }
+		maven { url 'https://files.minecraftforge.net/maven' }
+		maven { url 'http://repo.spongepowered.org/maven' }
+	}
+	dependencies {
+		classpath 'com.github.Chocohead:ForgeGradle:moderniser-SNAPSHOT'
+		classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
+	}
 }
-apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'net.minecraftforge.gradle.tweaker-client'
+apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'java'
 
-version = "2.3"
+version = "2.3.1"
 group= "me.recursiveg.autoharvest"
-archivesBaseName = "AutoHarvest-mc1.12-forge2387"
+archivesBaseName = "AutoHarvest-Rift"
 
 sourceCompatibility = targetCompatibility = '1.8'
-compileJava {
-    sourceCompatibility = targetCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+	maven { url 'https://www.dimdev.org/maven/' }
+	maven { url 'https://www.jitpack.io' }
+	maven { url 'http://repo.strezz.org/artifactory/list/Strezz-Central' }
 }
+dependencies {
+	implementation 'com.github.Chocohead:Rift:jitpack-SNAPSHOT:dev'
+}
+
 
 minecraft {
-    version = "1.12-14.21.1.2387"
-    runDir = "../run"
-    mappings = "snapshot_20170624"
-    makeObfSourceJar = false
+	version = '1.13.2'
+	mappings = 'snapshot_20181130'
+	runDir = 'run'
+	tweakClass = 'org.dimdev.riftloader.launch.RiftLoaderClientTweaker'
+}
+mixin {
+	defaultObfuscationEnv notch
+	add sourceSets.main, 'mixins.autoharvest.refmap.json'
+}
+jar {
+	from sourceSets.api.output
+	archiveName = "${project.archivesBaseName}-${version}-mc${project.minecraft.version}.jar"
 }
 
-dependencies { }
-
-processResources {
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-        expand 'version':project.version, 'mcversion':project.minecraft.version
-    }
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
+sourceJar {
+	from sourceSets.api.allSource
+	archiveName = "${project.archivesBaseName}-${version}-mc${project.minecraft.version}-src.jar"
 }

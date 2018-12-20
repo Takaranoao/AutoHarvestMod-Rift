@@ -6,38 +6,55 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Multimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
-import net.minecraft.block.BlockOldLog;
-import net.minecraft.block.BlockPlanks;
+import net.minecraft.block.BlockNetherWart;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.passive.*;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.IRegistry;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 public class CropManager {
-    public static final Block REED_BLOCK = Blocks.REEDS;
+    public static final Block REED_BLOCK = Blocks.SUGAR_CANE;
     public static final Block NETHER_WART = Blocks.NETHER_WART;
 
 
     public static final Set<Block> WEED_BLOCKS = new HashSet<Block>() {{
-        add(Blocks.SAPLING);
-        add(Blocks.TALLGRASS);
-        add(Blocks.DEADBUSH);
-        add(Blocks.YELLOW_FLOWER);
-        add(Blocks.RED_FLOWER);
+        add(Blocks.OAK_SAPLING);
+        add(Blocks.SPRUCE_SAPLING);
+        add(Blocks.BIRCH_SAPLING);
+        add(Blocks.JUNGLE_SAPLING);
+        add(Blocks.ACACIA_SAPLING);
+        add(Blocks.DARK_OAK_SAPLING);
+        add(Blocks.FERN);
+        add(Blocks.GRASS);
+        add(Blocks.DEAD_BUSH);
+        add(Blocks.DANDELION);
+        add(Blocks.POPPY);
         add(Blocks.BROWN_MUSHROOM);
         add(Blocks.RED_MUSHROOM);
-        add(Blocks.DOUBLE_PLANT);
+        add(Blocks.SUNFLOWER);
+        add(Blocks.LILAC);
+        add(Blocks.TALL_GRASS);
+        add(Blocks.LARGE_FERN);
+        add(Blocks.ROSE_BUSH);
+        add(Blocks.PEONY);
     }};
-
+    private static Item getRegisteredItemByName(String itemId){
+        Item item_ = (Item)IRegistry.ITEM.get(new ResourceLocation(itemId));
+        if(item_ == null){
+            throw new IllegalStateException("Invalid Item requested: " + itemId);
+        }else{
+            return item_;
+        }
+    }
     public static final BiMap<Block, Item> SEED_MAP = HashBiMap.create(
             new HashMap<Block, Item>() {{
                 put(Blocks.WHEAT, Items.WHEAT_SEEDS);
@@ -47,7 +64,7 @@ public class CropManager {
                 put(Blocks.NETHER_WART, Items.NETHER_WART);
                 put(Blocks.MELON_STEM, Items.MELON_SEEDS);
                 put(Blocks.PUMPKIN_STEM, Items.PUMPKIN_SEEDS);
-                put(Blocks.REEDS, Items.REEDS);
+                put(Blocks.SUGAR_CANE,getRegisteredItemByName("sugar_cane"));
             }});
 
     public static final Multimap<Item, Class<? extends EntityAnimal>> FEED_MAP;
@@ -71,8 +88,9 @@ public class CropManager {
 
         FEED_MAP.put(Items.ROTTEN_FLESH, EntityWolf.class);
 
-        FEED_MAP.put(Items.FISH, EntityOcelot.class);
-        FEED_MAP.put(Item.getItemById(37), EntityRabbit.class); // Dandelion
+        FEED_MAP.put(Items.COD, EntityOcelot.class);//Items.COD, Items.SALMON, Items.TROPICAL_FISH, Items.PUFFERFISH
+
+        FEED_MAP.put(getRegisteredItemByName("dandelion"), EntityRabbit.class); // Dandelion
         FEED_MAP.put(Items.CARROT, EntityRabbit.class);
 
         FEED_MAP.put(Items.WHEAT_SEEDS, EntityParrot.class);
@@ -87,7 +105,9 @@ public class CropManager {
         if (b instanceof BlockCrops) {
             return ((BlockCrops) b).isMaxAge(stat);
         } else if (b == NETHER_WART) {
-            return b.getMetaFromState(stat) >= 3;
+            if(b instanceof BlockNetherWart)
+                return  stat.get(BlockNetherWart.AGE) >= 3;
+            return false;
         } else if (b == REED_BLOCK) {
             Block blockDown = w.getBlockState(pos.down()).getBlock();
             Block blockDown2 = w.getBlockState(pos.down(2)).getBlock();
@@ -107,15 +127,15 @@ public class CropManager {
 
     public static boolean isCocoa(ItemStack stack) {
         if (stack == null || stack.getCount() <= 0) return false;
-        return stack.getItem() == Items.DYE && stack.getItemDamage() == EnumDyeColor.BROWN.getDyeDamage();
+        return stack.getItem() == Items.COCOA_BEANS;
     }
 
     public static boolean canPlantOn(Item m, World w, BlockPos p) {
         if (!SEED_MAP.containsValue(m)) return false;
-        return SEED_MAP.inverse().get(m).canPlaceBlockAt(w, p);
+        return SEED_MAP.inverse().get(m).getDefaultState().isValidPosition(w,p);
     }
 
     public static boolean isJungleLog(IBlockState s) {
-        return s.getBlock() == Blocks.LOG && s.getValue(BlockOldLog.VARIANT) == BlockPlanks.EnumType.JUNGLE;
+        return s.getBlock() == Blocks.JUNGLE_LOG;
     }
 }

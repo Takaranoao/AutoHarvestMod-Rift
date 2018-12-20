@@ -1,0 +1,14 @@
+
+{
+    "id": "autoharvest",
+    "name": "AutoHarvest-Rift",
+    "authors": [
+        "RecursiveG",
+        "Takaranoao"
+    ],
+    "listeners": [
+        "me.recursiveg.autoharvest.rift.AutoHarvestClientTickableListener",
+        "me.recursiveg.autoharvest.rift.AutoHarvestKeybindHandlerListener",
+        "me.recursiveg.autoharvest.rift.AutoHarvestRiftCore"
+    ]
+}

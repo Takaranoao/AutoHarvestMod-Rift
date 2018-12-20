@@ -1,5 +1,6 @@
 package me.recursiveg.autoharvest;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.inventory.ClickType;
@@ -7,15 +8,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketClickWindow;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.TextComponentString;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
-@Mod(modid = "autoharvest", name = "Auto Harvest")
-@SideOnly(Side.CLIENT)
 public class AutoHarvest {
     public enum HarvestMode {
         // SMART,  // Harvest then re-plant
@@ -31,26 +23,32 @@ public class AutoHarvest {
         }
     }
 
-    @Mod.Instance
+    //@Mod.Instance
     public static AutoHarvest instance;
     private HarvestMode mode = HarvestMode.OFF;
-    private TickListener listener = null;
-
-    @Mod.EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
-        MinecraftForge.EVENT_BUS.register(new KeyPressListener());
+    public static TickListener listener = null;
+    public static KeyPressListener KeyListener = null;
+    //@Mod.EventHandler
+//    public void preInit(FMLPreInitializationEvent event) {
+//        MinecraftForge.EVENT_BUS.register(new KeyPressListener());
+//    }
+    public void preInit(){
+        if (KeyListener == null) {
+            KeyListener = new KeyPressListener();
+        }
     }
-
     private void setEnabled() {
         if (listener == null) {
-            listener = new TickListener(mode, 2, FMLClientHandler.instance().getClientPlayerEntity());
-            MinecraftForge.EVENT_BUS.register(listener);
+            listener = new TickListener(mode, 2, Minecraft.getInstance().player);
+
+            //MinecraftForge.EVENT_BUS.register(listener);
         }
+
     }
 
     private void setDisabled() {
         if (listener != null) {
-            MinecraftForge.EVENT_BUS.unregister(listener);
+            //MinecraftForge.EVENT_BUS.unregister(listener);
             listener = null;
         }
     }
@@ -73,14 +71,14 @@ public class AutoHarvest {
     }
 
     public static void msg(String key, Object... obj) {
-        FMLClientHandler.instance().getClient().player.sendMessage(new TextComponentString(
+        Minecraft.getInstance().player.sendMessage(new TextComponentString(
                 I18n.format("notify.prefix")
                         + I18n.format(key, obj)
         ));
     }
 
     public static void moveInventoryItem(int srcIdx, int dstIdx) {
-        EntityPlayerSP p = FMLClientHandler.instance().getClientPlayerEntity();
+        EntityPlayerSP p = Minecraft.getInstance().player;
         NonNullList<ItemStack> a = p.inventory.mainInventory;
         if (a.get(srcIdx) != null) {
             p.connection.sendPacket(new CPacketClickWindow(0, srcIdx < 9 ? srcIdx + 36 : srcIdx, 0, ClickType.PICKUP, a.get(srcIdx), (short) 0));

@@ -1,24 +1,20 @@
 package me.recursiveg.autoharvest;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
-import org.lwjgl.input.Keyboard;
+import org.apache.commons.lang3.ArrayUtils;
+import org.lwjgl.glfw.GLFW;
 
-public class KeyPressListener {
-    public static final KeyBinding toggleKey = new KeyBinding("key.toggleAutoharvest", Keyboard.KEY_H, "key.categories.misc");
+public class KeyPressListener{
 
-    public KeyPressListener() {
-        ClientRegistry.registerKeyBinding(toggleKey);
-    }
+    //public static final KeyBinding toggleKey = new KeyBinding("key.toggleAutoharvest", GLFW.GLFW_KEY_H, "key.categories.misc");
 
-    @SubscribeEvent
-    public void onKeyPressed(InputEvent.KeyInputEvent event) {
-        if (toggleKey.isPressed()) {
+//    public KeyPressListener() {
+//        Minecraft.getInstance().gameSettings.keyBindings = ArrayUtils.add(Minecraft.getInstance().gameSettings.keyBindings, toggleKey);
+//    }
+    public void onProcessKey() {
             AutoHarvest a = AutoHarvest.instance;
             String modeName = a.toNextMode().toString().toLowerCase();
             AutoHarvest.msg("notify.switch_to." + modeName);
-        }
     }
 }

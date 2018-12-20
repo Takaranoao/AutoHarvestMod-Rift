@@ -1,0 +1,9 @@
+{
+  "minVersion": "0.7.7",
+  "package": "me.recursiveg.autoharvest.rift.mixin",
+  "refmap": "mixins.autoharvest.refmap.json",
+  "mixins": [],
+  "client": [
+    "MixinGameSettings"
+  ]
+}

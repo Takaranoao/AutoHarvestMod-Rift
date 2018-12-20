@@ -18,11 +18,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.relauncher.Side;
-
 import java.util.Collection;
 
 public class TickListener {
@@ -36,10 +31,9 @@ public class TickListener {
         this.p = player;
     }
 
-    @SubscribeEvent
-    public void onTick(TickEvent.PlayerTickEvent e) {
+    public void onTick(EntityPlayerSP player) {
         try {
-            if (e.side != Side.CLIENT || e.player != p) return;
+            if (player != p) return;
             switch (mode) {
                 // case SMART: smartTick();break;
                 case SEED:
@@ -74,7 +68,7 @@ public class TickListener {
                 for (int deltaZ = -range; deltaZ <= range; ++deltaZ) {
                     BlockPos pos = new BlockPos(X + deltaX, Y + deltaY, Z + deltaZ);
                     if (CropManager.isWeedBlock(w, pos)) {
-                        Minecraft.getMinecraft().playerController.onPlayerDamageBlock(pos, EnumFacing.UP);
+                        Minecraft.getInstance().playerController.onPlayerDamageBlock(pos, EnumFacing.UP);
                         return;
                     }
                 }
@@ -93,7 +87,7 @@ public class TickListener {
                     IBlockState state = w.getBlockState(pos);
                     Block b = state.getBlock();
                     if (CropManager.isCropMature(w, pos, state, b)) {
-                        Minecraft.getMinecraft().playerController.onPlayerDamageBlock(pos, EnumFacing.UP);
+                        Minecraft.getInstance().playerController.onPlayerDamageBlock(pos, EnumFacing.UP);
                         return;
                     }
                 }
@@ -123,8 +117,8 @@ public class TickListener {
                 for (int idx = 0; idx < 36; ++idx) {
                     ItemStack s = inv.get(idx);
                     if (s.getItem() == lastUsedItem.getItem() &&
-                            s.getItemDamage() == lastUsedItem.getItemDamage() &&
-                            s.hasTagCompound() == false) {
+                            s.getDamage() == lastUsedItem.getDamage() &&
+                            !s.hasTag()) {
                         supplmentIdx = idx;
                         stack = s;
                         break;
@@ -169,9 +163,10 @@ public class TickListener {
                 if (CropManager.canPlantOn(handItem.getItem(), w, pos)) {
                     BlockPos downPos = pos.down();
                     lastUsedItem = handItem.copy();
-                    FMLClientHandler.instance().getClient().playerController.processRightClickBlock(
+                    
+                    Minecraft.getInstance().playerController.processRightClickBlock(
                             p,
-                            FMLClientHandler.instance().getWorldClient(),
+                            Minecraft.getInstance().world,
                             downPos, EnumFacing.UP,
                             new Vec3d(X + deltaX + 0.5, Y, Z + deltaZ + 0.5),
                             EnumHand.MAIN_HAND);
@@ -200,9 +195,9 @@ public class TickListener {
                         tmpPos = pos.add(tmpFace.getDirectionVec());
                         if (w.getBlockState(tmpPos).getBlock() == Blocks.AIR) {
                             lastUsedItem = handItem.copy();
-                            FMLClientHandler.instance().getClient().playerController.processRightClickBlock(
+                            Minecraft.getInstance().playerController.processRightClickBlock(
                                     p,
-                                    FMLClientHandler.instance().getWorldClient(),
+                                    Minecraft.getInstance().world,
                                     pos, tmpFace,
                                     new Vec3d(X + deltaX + 1, Y + deltaY + 0.5, Z + deltaZ + 0.5),
                                     EnumHand.MAIN_HAND);
@@ -214,9 +209,9 @@ public class TickListener {
                         tmpPos = pos.add(tmpFace.getDirectionVec());
                         if (w.getBlockState(tmpPos).getBlock() == Blocks.AIR) {
                             lastUsedItem = handItem.copy();
-                            FMLClientHandler.instance().getClient().playerController.processRightClickBlock(
+                            Minecraft.getInstance().playerController.processRightClickBlock(
                                     p,
-                                    FMLClientHandler.instance().getWorldClient(),
+                                    Minecraft.getInstance().world,
                                     pos, tmpFace,
                                     new Vec3d(X + deltaX, Y + deltaY + 0.5, Z + deltaZ + 0.5),
                                     EnumHand.MAIN_HAND);
@@ -228,9 +223,9 @@ public class TickListener {
                         tmpPos = pos.add(tmpFace.getDirectionVec());
                         if (w.getBlockState(tmpPos).getBlock() == Blocks.AIR) {
                             lastUsedItem = handItem.copy();
-                            FMLClientHandler.instance().getClient().playerController.processRightClickBlock(
+                            Minecraft.getInstance().playerController.processRightClickBlock(
                                     p,
-                                    FMLClientHandler.instance().getWorldClient(),
+                                    Minecraft.getInstance().world,
                                     pos, tmpFace,
                                     new Vec3d(X + deltaX + 0.5, Y + deltaY + 0.5, Z + deltaZ + 1),
                                     EnumHand.MAIN_HAND);
@@ -242,9 +237,9 @@ public class TickListener {
                         tmpPos = pos.add(tmpFace.getDirectionVec());
                         if (w.getBlockState(tmpPos).getBlock() == Blocks.AIR) {
                             lastUsedItem = handItem.copy();
-                            FMLClientHandler.instance().getClient().playerController.processRightClickBlock(
+                            Minecraft.getInstance().playerController.processRightClickBlock(
                                     p,
-                                    FMLClientHandler.instance().getWorldClient(),
+                                    Minecraft.getInstance().world,
                                     pos, tmpFace,
                                     new Vec3d(X + deltaX + 0.5, Y + deltaY + 0.5, Z + deltaZ),
                                     EnumHand.MAIN_HAND);
@@ -275,7 +270,7 @@ public class TickListener {
             for (EntityAnimal e : p.getEntityWorld().getEntitiesWithinAABB(type, box)) {
                 if (e.getGrowingAge() >= 0 && !e.isInLove()) {
                     lastUsedItem = handItem.copy();
-                    EnumActionResult result = FMLClientHandler.instance().getClient().playerController
+                    EnumActionResult result = Minecraft.getInstance().playerController
                             .interactWithEntity(p, e, EnumHand.MAIN_HAND);
                 }
             }
@@ -284,7 +279,7 @@ public class TickListener {
             for (EntitySheep e : p.getEntityWorld().getEntitiesWithinAABB(EntitySheep.class, box)) {
                 if (!e.isChild() && !e.getSheared()) {
                     lastUsedItem = handItem.copy();
-                    FMLClientHandler.instance().getClient().playerController
+                    Minecraft.getInstance().playerController
                             .interactWithEntity(p, e, EnumHand.MAIN_HAND);
                     return;
                 }
