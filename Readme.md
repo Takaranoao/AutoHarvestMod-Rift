@@ -1,4 +1,4 @@
-### Automatic Harvest Mod for Minecraft 1.11.2
+### Automatic Harvest Mod for Minecraft 1.13.2
 This mod give you the easiest way to harvest crops.
 You just need to walk around, and all the mature crops will be harvested and re-planted.
 
